@@ -48,24 +48,23 @@ we downloaded a dataset of 1,000 satellite images from the LANDSAT/LE07/C02/ T1\
 
 ## Result
 
-<p align="center">
-    <img src="figure/result1.jpg" alt="Inpainting Result">
-    <p>Figure 1: Inpainting results under different mask sizes</p>
-</p>
+<div style="text-align: center;">
+    <img src="figure/result1.jpg" alt="Inpainting Result1">
+    <p>Figure 1: Inpainting results1 under different mask sizes</p>
+</div>
+<br>
 
-<figure style="text-align: center;">
-  <img src="figure/result2.jpg" alt="Sample Image">
-  <figcaption>Figure 2: Inpainting results2 under different mask sizes</figcaption>
-</figure>
+<div style="text-align: center;">
+    <img src="figure/result2.jpg" alt="Inpainting Result2">
+    <p>Figure 2: Inpainting results2 under different mask sizes</p>
+</div>
+<br>
 
-
-
-<figure style="text-align: center;">
-  <img src="figure/result3.jpg" alt="Sample Image">
-  <figcaption>Figure 3: Comparison results</figcaption>
-</figure>
-
-
+<div style="text-align: center;">
+    <img src="figure/result3.jpg" alt="Comparison results">
+    <p>Figure 3: Comparison results</p>
+</div>
+<br>
 
 ## Real Application
 
@@ -116,27 +115,23 @@ ValueError: If input_path is not a file or output_path is not a directory.
 
 ### Application Results Display:
 
+<div style="text-align: center;">
+    <img src="figure/result4_input.jpg" alt="Input">
+    <p>Figure 4: Input</p>
+</div>
+<br>
 
-<figure style="text-align: center;">
-  <img src="figure/result4_input.jpg" alt="Sample Image">
-  <figcaption>Figure 4: Input</figcaption>
-</figure>
+<div style="text-align: center;">
+    <img src="figure/result4_output1.jpg" alt="Output ground truth">
+    <p>Figure 5: Output ground truth</p>
+</div>
+<br>
 
-
-
-<figure style="text-align: center;">
-  <img src="figure/result4_output1.jpg" alt="Sample Image">
-  <figcaption>Figure 4: Output ground truth</figcaption>
-</figure>
-
-
-
-<figure style="text-align: center;">
-  <img src="figure/result4_output2.jpg" alt="Sample Image">
-  <figcaption>Figure 5: Output inpainting</figcaption>
-</figure>
-
-
+<div style="text-align: center;">
+    <img src="figure/result4_output2.jpg" alt="Output inpainting">
+    <p>Figure 6: Output inpainting</p>
+</div>
+<br>
 
 
 ## License
