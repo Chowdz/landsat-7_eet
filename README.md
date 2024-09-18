@@ -40,7 +40,7 @@ we downloaded a dataset of 1,000 satellite images from the LANDSAT/LE07/C02/ T1\
 
    ```python trainer.py --batch_size 10 --epoch 1 --n_epoch 500 --lr 0.0005 --beta1 0.95 --beta2 0.9995 --train_img_root 'home/train' --train_mask_root 'home/mask' --train_result_root 'home/result/' --save_model_root 'home/models/' --img_size 256 --in_c 4 --out_c 3 --patch_size 4 --embed_dim 64 --depth [1, 2, 3, 4] --num_heads [1, 2, 4, 8] --adv_loss_weight 1 --per_loss_weight 0.5 --sty_loss_weight 10000 --l1_loss_weight 100 --sobel_loss_weight 80 --sample_interval 500```
 
-   Note: The --train_img_root and --train_mask_root parameters refer to the folders containing Landsat-7 ETM+ training satellite images and missing pixel masks, respectively. Each image in these folders should already be cut into 256×256 patches.
+   Note: The --train_img_root and --train_mask_root parameters refer to the folders containing Landsat-7 ETM+ training satellite images and missing pixel masks, respectively. Each image in these folders should have been pre-cut to a size of 256×256 pixels.
 
 2. Tensorboard:
 
