@@ -48,9 +48,12 @@ we downloaded a dataset of 1,000 satellite images from the LANDSAT/LE07/C02/ T1\
 
 ## Result
 
-<div style="text-align: center;">
-  <img src="figure/result1.jpg" alt="Sample Image" style="max-width: 100%;">
-  <p>Figure 1: Figure 1: Inpainting results1 under different mask sizes</p>
+<div>
+    <center>
+    <img src="figure/result1.jpg"
+    <br>
+    Figure 1: Inpainting results1 under different mask sizes
+    </center>
 </div>
 
 <figure style="text-align: center;">
