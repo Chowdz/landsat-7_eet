@@ -1,11 +1,3 @@
-"""
-# encoding: utf-8
-#!/usr/bin/env python3
-
-@Author : Admin
-@Time : 2024/9/11 12:13
-"""
-
 import os
 import torch
 import gdown
