@@ -53,10 +53,14 @@ we downloaded a dataset of 1,000 satellite images from the LANDSAT/LE07/C02/ T1\
   <figcaption>Figure 1: Inpainting results1 under different mask sizes</figcaption>
 </figure>
 
+
+
 <figure style="text-align: center;">
   <img src="figure/result2.jpg" alt="Sample Image">
   <figcaption>Figure 2: Inpainting results2 under different mask sizes</figcaption>
 </figure>
+
+
 
 <figure style="text-align: center;">
   <img src="figure/result3.jpg" alt="Sample Image">
@@ -115,17 +119,18 @@ ValueError: If input_path is not a file or output_path is not a directory.
 ### Application Results Display:
 
 
-
 <figure style="text-align: center;">
   <img src="figure/result4_input.jpg" alt="Sample Image">
   <figcaption>Figure 4: Input</figcaption>
 </figure>
 
 
+
 <figure style="text-align: center;">
   <img src="figure/result4_output1.jpg" alt="Sample Image">
   <figcaption>Figure 4: Output ground truth</figcaption>
 </figure>
+
 
 
 <figure style="text-align: center;">
