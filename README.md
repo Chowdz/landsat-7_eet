@@ -38,9 +38,9 @@ we downloaded a dataset of 1,000 satellite images from the LANDSAT/LE07/C02/ T1\
 
 1. Start:
 
-   ```python trainer.py --batch_size 10 --epoch 1 --n_epoch 500 --lr 0.0005 --beta1 0.95 --beta2 0.9995 --train_img_root 'home/train' --train_mask_root 'home/mask' --train_result_root 'home/result/' --save_model_root 'home/models/' --img_size 256 --in_c 4 --out_c 3 --patch_size 4 --embed_dim 64 --depth [1, 2, 3, 4] --num_heads [1, 2, 4, 8] --adv_loss_weight 1 --per_loss_weight 0.5 --sty_loss_weight 10000 --l1_loss_weight 100 --sobel_loss_weight 80 --sample_interval 500```
+   ```python trainer.py --BATCH_SIZE 10 --EPOCH 1 --N_EPOCH 500 --LR 0.0005 --BETA1 0.95 --BETA2 0.9995 --TRAIN_IMG_ROOT 'home/train' --TRAIN_MASK_ROOT 'home/mask' --TRAIN_RESULT_ROOT 'home/result/' --SAVE_MODEL_ROOT 'home/models/' --IMG_SIZE 256 --IN_C 4 --OUT_C 3 --PATCH_SIZE 4 --EMBED_DIM --DEPTH [1, 2, 3, 4] --NUM_HEADS [1, 2, 4, 8] --ADV_LOSS_WEIGHT 1 --PER_LOSS_WEIGHT 0.5 --STY_LOSS_WEIGHT 10000 --L1_LOSS_WEIGHT 100 --CSHE_LOSS_WEIGHT 80 --SAMPLE_INTERVAL 500```
 
-   Note: The --train_img_root and --train_mask_root parameters refer to the folders containing Landsat-7 ETM+ training satellite images and missing pixel masks, respectively. Each image in these folders should have been pre-cut to a size of 256×256 pixels.
+   Note: The --TRAIN_IMG_ROOT and --TRAIN_MASK_ROOT parameters refer to the folders containing Landsat-7 ETM+ training satellite images and missing pixel masks, respectively. Each image in these folders should have been pre-cut to a size of 256×256 pixels.
 
 2. Tensorboard:
 
@@ -99,7 +99,7 @@ ValueError: If input_path is not a file or output_path is not a directory.
 
 ### Steps:
 
-1. ```cd landsat-7_eet```
+1. ```cd landsat-7_eet/application```
 
 2. ```python main.py --INPUT_IMG_PATH '/home/user/dataset/CorruptedImage.tif' --OUTPUT_IMG_PATH '/home/user/dataset/InpaintingImages/' --VIS_PARAM {'min': 0, 'max': 0.4, 'gamma': 1.4}```
 
