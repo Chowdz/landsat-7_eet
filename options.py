@@ -35,7 +35,7 @@ class Options:
         self.PER_LOSS_WEIGHT: float = 0.5
         self.STY_LOSS_WEIGHT: float = 10000.
         self.L1_LOSS_WEIGHT: float = 100.
-        self.SOBEL_LOSS_WEIGHT: float = 80.
+        self.CSHE_LOSS_WEIGHT: float = 80.
 
         self.SAMPLE_INTERVAL: int = 1000
 
@@ -68,8 +68,8 @@ class Options:
                             help='Weight of perceptual loss')
         parser.add_argument('--STY_LOSS_WEIGHT', type=float, default=self.STY_LOSS_WEIGHT, help='Weight of style loss')
         parser.add_argument('--L1_LOSS_WEIGHT', type=float, default=self.L1_LOSS_WEIGHT, help='Weight of L1 loss')
-        parser.add_argument('--SOBEL_LOSS_WEIGHT', type=float, default=self.SOBEL_LOSS_WEIGHT,
-                            help='Weight of Sobel loss')
+        parser.add_argument('--CSHE_LOSS_WEIGHT', type=float, default=self.CSHE_LOSS_WEIGHT,
+                            help='Weight of CSHE loss')
         parser.add_argument('--SAMPLE_INTERVAL', type=int, default=self.SAMPLE_INTERVAL,
                             help='Interval for saving samples')
 

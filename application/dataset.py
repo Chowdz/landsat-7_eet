@@ -6,6 +6,7 @@ from PIL import Image
 from torchvision import transforms
 from torch.utils.data import Dataset
 
+
 class SatelliteDataset(Dataset):
     def __init__(self, img_path, crop_size=5120, patch_size=256, step_size=236, vis_params=None):
 
@@ -109,21 +110,34 @@ class SatelliteDataset(Dataset):
         mask = (image_tensor == 0).any(dim=0).float()
         return mask.unsqueeze(0)
 
-    def extract_sobel_edge(self, image_tensor, mask_tensor):
-        img_gray = cv2.cvtColor(image_tensor.numpy().transpose(1, 2, 0), cv2.COLOR_RGB2GRAY)
-        img_gray[mask_tensor.squeeze().numpy() == 1] = np.nan
+    def extract_cshe_edge(self, image_tensor, mask_tensor):
+
+        img_gray = np.array(transforms.ToPILImage()(image_tensor).convert('L'), dtype=np.float32)
+        mask_np = mask_tensor.squeeze().numpy()
+
+        if np.all(mask_np == 0):
+            img_gray_canny = img_gray.astype(np.uint8)
+        else:
+            img_gray_canny = cv2.inpaint(img_gray.astype(np.uint8), mask_np.astype(np.uint8), 1, cv2.INPAINT_TELEA)
+
+        edges_canny = cv2.Canny(img_gray_canny, 50, 120)
+        edges_canny = torch.tensor(edges_canny, dtype=torch.float32).unsqueeze(0)
+
+        img_gray[mask_np == 1] = np.nan
 
         sobel_x = cv2.Sobel(img_gray, cv2.CV_64F, 1, 0, ksize=3)
         sobel_y = cv2.Sobel(img_gray, cv2.CV_64F, 0, 1, ksize=3)
         sobel_z = cv2.Sobel(img_gray, cv2.CV_64F, 1, 1, ksize=3)
 
-        img_sobel = sobel_x ** 2 + sobel_y ** 2 + sobel_z ** 2
-        img_sobel = np.nan_to_num(img_sobel)
+        edges_sobel = sobel_x ** 2 + sobel_y ** 2 + sobel_z ** 2
+        edges_sobel = np.nan_to_num(edges_sobel)
+        edges_sobel = torch.tensor(edges_sobel, dtype=torch.float32).unsqueeze(0)
+        edges_sobel = torch.sqrt(edges_sobel)
 
-        sobel_tensor = torch.tensor(img_sobel, dtype=torch.float32).unsqueeze(0)
-        sobel_tensor = torch.sqrt(sobel_tensor)
-        sobel_tensor = (sobel_tensor - torch.min(sobel_tensor)) / (torch.max(sobel_tensor) - torch.min(sobel_tensor))
-        return sobel_tensor
+        cshe = 0.5 * edges_canny + 0.5 * edges_sobel
+        cshe = (cshe - torch.min(cshe)) / (torch.max(cshe) - torch.min(cshe))
+
+        return cshe
 
     def __len__(self):
         return len(self.patches)
@@ -132,5 +146,5 @@ class SatelliteDataset(Dataset):
         patch = self.patches[index]
         patch = self.apply_vis_params(patch)
         mask = self.extract_landsat7_mask(patch)
-        sobel_edge = self.extract_sobel_edge(patch, mask)
-        return patch, mask, sobel_edge
+        cshe = self.extract_cshe_edge(patch, mask)
+        return patch, mask, cshe

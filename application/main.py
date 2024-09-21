@@ -151,10 +151,10 @@ def inpainting_process(input_path, output_path, vis_param=None):
     with torch.no_grad():
         G.eval()
         for index, x in enumerate(dataloader):
-            img_tensor, mask, sobel_edge = x[0].to(device), x[1].to(device), x[2].to(device)
+            img_tensor, mask, cshe_edge = x[0].to(device), x[1].to(device), x[2].to(device)
             img_tensor = nn.Parameter(img_tensor, requires_grad=False)
-            sobel_edge = nn.Parameter(sobel_edge, requires_grad=False)
-            img_fake, sobel_fake = G(img_tensor, sobel_edge, mask)
+            cshe_edge = nn.Parameter(cshe_edge, requires_grad=False)
+            img_fake, cshe_fake = G(img_tensor, cshe_edge, mask)
 
             real_fake = torch.cat([img_tensor, img_fake], dim=0)
             patches.append(real_fake)
@@ -165,8 +165,10 @@ def inpainting_process(input_path, output_path, vis_param=None):
     final_tensor = stitch_patches(patches, rows_per_image=22, overlap_size=20)
     raw_tensor, fake_tensor = final_tensor[0], final_tensor[1]
 
-    inpainting_img_path = os.path.join(output_path, 'Inpainting_' + dataset.file_name)
-    ground_truth_img_path = os.path.join(output_path, 'Ground_Truth_' + dataset.file_name)
+    name_parts = dataset.file_name.split('.')
+
+    inpainting_img_path = os.path.join(output_path, name_parts[0] + '_Inpainting.' + name_parts[1])
+    ground_truth_img_path = os.path.join(output_path, name_parts[0] + '_Corrupted.' + name_parts[1])
 
     fake_img = transforms.ToPILImage()(fake_tensor)
     fake_img.save(inpainting_img_path)

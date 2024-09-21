@@ -23,29 +23,38 @@ class SatelliteDateset(Dataset):
         self.image_type = image_type
 
     def __getitem__(self, index):
+
+        image = Image.open(self.image_files[index % self.number_image])
+        img_gray = np.array(image.convert('L'))
+
         if self.image_type == 'tensor':
             img_tensor = torch.load(self.image_files[index % self.number_image])
         elif self.image_type == 'image':
-            img_tensor = self.image_to_tensor()(Image.open(self.image_files[index % self.number_image]))
+            img_tensor = self.image_to_tensor()(image)
         else:
             raise TypeError("The input can only be 'tensor' or 'image'.")
-        img_gray = cv2.imread(self.image_files[index % self.number_image], cv2.IMREAD_GRAYSCALE)
+
         mask_tensor = self.image_to_tensor()(Image.open(self.mask_files[index % self.number_mask]))
         if not torch.all(mask_tensor == 0):
             mask_tensor = (mask_tensor - torch.min(mask_tensor)) / (torch.max(mask_tensor) - torch.min(mask_tensor))
+
+        edges_canny = cv2.Canny(img_gray, 50, 120)
+        edges_canny = torch.tensor(edges_canny, dtype=torch.float32).unsqueeze(0)
 
         sobel_x = cv2.Sobel(img_gray, cv2.CV_64F, 1, 0, ksize=3)
         sobel_y = cv2.Sobel(img_gray, cv2.CV_64F, 0, 1, ksize=3)
         sobel_z = cv2.Sobel(img_gray, cv2.CV_64F, 1, 1, ksize=3)
 
-        img_sobel = torch.tensor(sobel_x ** 2 + sobel_y ** 2 + sobel_z ** 2, dtype=torch.float32).unsqueeze(0)
-        sobel_mask = torch.abs(torch.sqrt(img_sobel * (1 - mask_tensor)))
-        sobel_mask = (sobel_mask - torch.min(sobel_mask)) / (torch.max(sobel_mask) - torch.min(sobel_mask))
+        edges_sobel = torch.tensor(sobel_x ** 2 + sobel_y ** 2 + sobel_z ** 2, dtype=torch.float32).unsqueeze(0)
+        edges_sobel = torch.sqrt(edges_sobel)
 
-        sobel_tensor = np.abs(np.sqrt(img_sobel))
-        sobel_tensor = (sobel_tensor - torch.min(sobel_tensor)) / (torch.max(sobel_tensor) - torch.min(sobel_tensor))
+        cshe = 0.5 * edges_canny + 0.5 * edges_sobel
+        cshe_mask = cshe * (1 - mask_tensor)
+        cshe_mask = (cshe_mask - torch.min(cshe_mask)) / (torch.max(cshe_mask) - torch.min(cshe_mask))
 
-        return img_tensor, mask_tensor, sobel_mask, sobel_tensor
+        cshe = (cshe - torch.min(cshe)) / (torch.max(cshe) - torch.min(cshe))
+
+        return img_tensor, mask_tensor, cshe_mask, cshe
     def __len__(self):
         return self.number_image
 

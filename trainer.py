@@ -17,7 +17,7 @@ from utils import psnr_value, ssim_value, mape_value, tensor_to_image
 class Trainer(nn.Module):
     def __init__(self, batch_size, epoch, n_epoch, lr, beta1, beta2, img_size, in_c, out_c,
                  patch_size, embed_dim, depth, num_heads, adv_loss_weight, per_loss_weight,
-                 sty_loss_weight, l1_loss_weight, sobel_loss_weight, save_model_root, train_result_root,
+                 sty_loss_weight, l1_loss_weight, cshe_loss_weight, save_model_root, train_result_root,
                  sample_interval, drop_ratio=0., attn_drop_ratio=0., drop_path_ratio=0.):
         '''
         :param batch_size: batch size for training
@@ -37,7 +37,7 @@ class Trainer(nn.Module):
         :param per_loss_weight: perceptual loss weight
         :param sty_loss_weight: style loss weight
         :param l1_loss_weight: l1 loss weight
-        :param sobel_loss_weight: sobel loss weight
+        :param cshe_loss_weight: cshe loss weight
         :param save_model_root: The location where the model is saved
         :param train_result_root: The location where the train result is saved
         :param sample_interval: interval between saving image samples
@@ -72,7 +72,7 @@ class Trainer(nn.Module):
         self.per_loss_weight = per_loss_weight
         self.sty_loss_weight = sty_loss_weight
         self.l1_loss_weight = l1_loss_weight
-        self.sobel_loss_weight = sobel_loss_weight
+        self.cshe_loss_weight = cshe_loss_weight
         self.sample_interval = sample_interval
 
     def load_net(self, epoch):
@@ -90,16 +90,16 @@ class Trainer(nn.Module):
         self.load_net(self.epoch - 1)
         for epoch in range(self.epoch, self.n_epoch):
             for index, x in enumerate(dataloader):
-                img_truth, mask, sobel_mask, sobel = (x[0].to(self.device), x[1].to(self.device),
+                img_truth, mask, cshe_mask, cshe = (x[0].to(self.device), x[1].to(self.device),
                                                       x[2].to(self.device), x[3].to(self.device))
                 img = nn.Parameter(img_truth * (1 - mask), requires_grad=True)
-                sobel_mask = nn.Parameter(sobel_mask, requires_grad=True)
+                cshe_mask = nn.Parameter(cshe_mask, requires_grad=True)
 
                 valid = nn.Parameter(torch.ones([self.batch_size, 1, 30, 30]).to(self.device), requires_grad=False)
                 fake = nn.Parameter(torch.zeros([self.batch_size, 1, 30, 30]).to(self.device), requires_grad=False)
 
                 self.opt_G.zero_grad()
-                img_fake, sobel_fake = self.G(img, sobel_mask, mask)
+                img_fake, cshe_fake = self.G(img, cshe_mask, mask)
 
                 img_fake_dis, _ = self.D(img_fake)
 
@@ -111,9 +111,9 @@ class Trainer(nn.Module):
 
                 l1_loss = self.l1_loss(img_fake, img_truth) * self.l1_loss_weight
 
-                sobel_loss = self.l1_loss(sobel_fake, sobel) * self.sobel_loss_weight
+                cshe_loss = self.l1_loss(cshe_fake, cshe) * self.cshe_loss_weight
 
-                G_loss = (adv_loss + per_loss + sty_loss + l1_loss + sobel_loss) / 5
+                G_loss = (adv_loss + per_loss + sty_loss + l1_loss + cshe_loss) / 5
 
                 G_loss.backward()
                 self.opt_G.step()
@@ -142,11 +142,11 @@ class Trainer(nn.Module):
                 sys.stdout.write(
                     "\033[36m[Epoch %d/%d][Batch %2d/%d]\033[33m"
                     "\033[33m[G LOSS: %.4f][D LOSS: %.4f]\033[0m"
-                    "\033[31m[ADV: %.4f PER: %.4f STY: %.4f L1: %.4f SOBEL: %.4F DIS_REAL: %.4f DIS_FAKE: %.4f]\033[0m"
+                    "\033[31m[ADV: %.4f PER: %.4f STY: %.4f L1: %.4f CSHE: %.4F DIS_REAL: %.4f DIS_FAKE: %.4f]\033[0m"
                     "\033[36m[PSNR: %.4f SSIM: %.4f MAPE: %.4f]\033[33m"
                     " \033[32mETA: %s\033[0m TAS: %s \n"
                     % (epoch, self.n_epoch, index, len(dataloader), G_loss.item(), D_loss.item(),
-                       adv_loss.item(), per_loss.item(), sty_loss.item(), l1_loss.item(), sobel_loss.item(),
+                       adv_loss.item(), per_loss.item(), sty_loss.item(), l1_loss.item(), cshe_loss.item(),
                        dis_real_loss.item(), dis_fake_loss.item(), psnr, ssim, mape, time_left, time_use))
 
                 # Every n batches, save the inpainted image
@@ -156,26 +156,26 @@ class Trainer(nn.Module):
                     real_img = torch.split(img_truth, split_size_or_sections=1, dim=0)
                     real_img_comp = torch.cat(real_img, dim=3).reshape(3, 256, -1)
 
-                    sobel_img = torch.split(sobel_mask, split_size_or_sections=1, dim=0)
-                    sobel_img_comp = torch.cat(sobel_img, dim=3).reshape(1, 256, -1).repeat(3, 1, 1)
+                    cshe_img = torch.split(cshe_mask, split_size_or_sections=1, dim=0)
+                    cshe_img_comp = torch.cat(cshe_img, dim=3).reshape(1, 256, -1).repeat(3, 1, 1)
 
                     real_miss = torch.split(img + mask, split_size_or_sections=1, dim=0)
                     real_miss_comp = torch.cat(real_miss, dim=3).reshape(3, 256, -1)
 
-                    fake_sobel = torch.split(sobel_fake, split_size_or_sections=1, dim=0)
-                    fake_sobel_comp = torch.cat(fake_sobel, dim=3).reshape(1, 256, -1).repeat(3, 1, 1)
+                    fake_cshe = torch.split(cshe_fake, split_size_or_sections=1, dim=0)
+                    fake_cshe_comp = torch.cat(fake_cshe, dim=3).reshape(1, 256, -1).repeat(3, 1, 1)
 
                     fake_img = torch.split(img_fake, split_size_or_sections=1, dim=0)
                     fake_img_comp = torch.cat(fake_img, dim=3).reshape(3, 256, -1)
 
-                    comp = torch.cat([real_img_comp, sobel_img_comp, real_miss_comp,
-                                      fake_sobel_comp, fake_img_comp], dim=1)
+                    comp = torch.cat([real_img_comp, cshe_img_comp, real_miss_comp,
+                                      fake_cshe_comp, fake_img_comp], dim=1)
                     comp_pic = tensor_to_image(comp)
                     comp_pic.save(self.train_result_root + str(epoch) + '_' + str(index) + '.png')
 
-                    grid_image = make_grid([real_img_comp, sobel_img_comp, real_miss_comp,
-                                            fake_sobel_comp, fake_img_comp], nrow=1)
-                    self.writer.add_image('Original / Sobel / Corrupted / Sobel Reconstructed / Reconstructed',
+                    grid_image = make_grid([real_img_comp, cshe_img_comp, real_miss_comp,
+                                            fake_cshe_comp, fake_img_comp], nrow=1)
+                    self.writer.add_image('Original / CSHE / Corrupted / CSHE Reconstructed / Reconstructed',
                                           grid_image, batches_done)
 
                     self.writer.add_scalars('LOSS', {'G LOSS': G_loss.item(),
@@ -184,7 +184,7 @@ class Trainer(nn.Module):
                     self.writer.add_scalars('G LOSS DETAIL', {'ADV LOSS': adv_loss.item(),
                                                               'PER LOSS': per_loss.item(), 'STY LOSS': sty_loss.item(),
                                                               'L1 LOSS': l1_loss.item(),
-                                                              'SOBEL LOSS': sobel_loss.item()}, batches_done)
+                                                              'CSHE LOSS': cshe_loss.item()}, batches_done)
 
                     self.writer.add_scalars('D LOSS DETAIL', {'DIS REAL': dis_real_loss.item(),
                                                               'DIS FAKE': dis_fake_loss.item()}, batches_done)
@@ -206,7 +206,7 @@ if __name__ == '__main__':
                     embed_dim=args.EMBED_DIM, depth=args.DEPTH, num_heads=args.NUM_HEADS,
                     adv_loss_weight=args.ADV_LOSS_WEIGHT, per_loss_weight=args.PER_LOSS_WEIGHT,
                     sty_loss_weight=args.STY_LOSS_WEIGHT, l1_loss_weight=args.L1_LOSS_WEIGHT,
-                    sobel_loss_weight=args.SOBEL_LOSS_WEIGHT, sample_interval=args.SAMPLE_INTERVAL,
+                    cshe_loss_weight=args.CSHE_LOSS_WEIGHT, sample_interval=args.SAMPLE_INTERVAL,
                     save_model_root=args.SAVE_MODEL_ROOT, train_result_root=args.TRAIN_RESULT_ROOT,
                     drop_ratio=0.2, attn_drop_ratio=0.3, drop_path_ratio=0.2)
 

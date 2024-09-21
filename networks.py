@@ -94,9 +94,7 @@ class Attention(nn.Module):
 
         # transpose: -> [batch_size, num_heads, embed_dim_per_head, num_patches]
         # @: multiply -> [batch_size, num_heads, num_patches, num_patches]
-        qk = (q @ k.transpose(-2, -1)) * self.scale
-        qs = (s @ s.transpose(-2, -1)) * self.scale
-        attn = qk + qs
+        attn = (q @ (k + s).transpose(-2, -1)) * self.scale
         attn = attn.softmax(dim=-1)
         attn = self.attn_drop(attn)
 
